@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-
-const Color kValmetRed = Color(0xFFA62A2A);
-const Color kValmetDarkGrey = Color(0xFF5A5A5A);
-const Color kValmetBeige = Color(0xFFF5F0E8);
-const Color kValmetButtonGrey = Color(0xFFE0E0E0);
-const Color kValmetTextDark = Color(0xFF333333);
+import 'theme_colors.dart';
+import 'introduction_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -61,44 +57,43 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
               const Divider(color: kValmetDarkGrey, thickness: 1),
               const SizedBox(height: 20),
-
               _buildMainButton(
                 icon: Icons.menu_book,
                 text: 'Introdução',
                 onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const IntroductionScreen()),
+                  );
                 },
               ),
               const SizedBox(height: 16),
               _buildMainButton(
                 icon: Icons.settings,
                 text: 'Funcionamento',
-                onPressed: () {
-                },
+                onPressed: () {},
               ),
               const SizedBox(height: 16),
               _buildMainButton(
                 icon: Icons.assignment,
                 text: 'Exemplos',
-                onPressed: () {
-                },
+                onPressed: () {},
               ),
               const SizedBox(height: 20),
               const Divider(color: kValmetDarkGrey, thickness: 1),
               const SizedBox(height: 30),
-
               _buildSecondaryButton(
                 text: 'Usar régua',
                 color: kValmetRed,
-                onPressed: () {
-                },
+                onPressed: () {},
               ),
               const SizedBox(height: 12),
               _buildSecondaryButton(
                 text: 'Sobre',
                 color: kValmetDarkGrey,
                 icon: Icons.info_outline,
-                onPressed: () {
-                },
+                onPressed: () {},
               ),
             ],
           ),
@@ -119,12 +114,15 @@ class HomeScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: TextButton.icon(
-                onPressed: () {
-                },
-                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                onPressed: () {},
+                icon: const Icon(Icons.arrow_back,
+                    color: Colors.white, size: 20),
                 label: const Text(
                   'Sair',
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500),
                 ),
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white,
@@ -138,9 +136,7 @@ class HomeScreen extends StatelessWidget {
               height: 30,
               color: Colors.white54,
             ),
-
             const Spacer(),
-
             const Text(
               'Valmet',
               style: TextStyle(
@@ -157,11 +153,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainButton({
-    required IconData icon,
-    required String text,
-    required VoidCallback onPressed,
-  }) {
+  Widget _buildMainButton(
+      {required IconData icon,
+        required String text,
+        required VoidCallback onPressed}) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -196,12 +191,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSecondaryButton({
-    required String text,
-    required Color color,
-    required VoidCallback onPressed,
-    IconData? icon,
-  }) {
+  Widget _buildSecondaryButton(
+      {required String text,
+        required Color color,
+        required VoidCallback onPressed,
+        IconData? icon}) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -220,7 +214,9 @@ class HomeScreen extends StatelessWidget {
             Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 8),
           ],
-          Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(text,
+              style:
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         ],
       ),
     );
