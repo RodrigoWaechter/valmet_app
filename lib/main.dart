@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
+import 'exemplos_screen.dart';
+import 'introducao_screen.dart';
 import 'theme_colors.dart';
-import 'introduction_screen.dart';
+import 'funcionamento_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,10 +20,7 @@ class MyApp extends StatelessWidget {
         primaryColor: kValmetRed,
         scaffoldBackgroundColor: kValmetBeige,
         fontFamily: 'Roboto',
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          color: kValmetRed,
-        ),
+        appBarTheme: const AppBarTheme(elevation: 0, color: kValmetRed),
       ),
       debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
@@ -64,7 +64,8 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const IntroductionScreen()),
+                      builder: (context) => const IntroductionScreen(),
+                    ),
                   );
                 },
               ),
@@ -72,13 +73,27 @@ class HomeScreen extends StatelessWidget {
               _buildMainButton(
                 icon: Icons.settings,
                 text: 'Funcionamento',
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FuncionamentoScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               _buildMainButton(
                 icon: Icons.assignment,
                 text: 'Exemplos',
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ExamplesScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               const Divider(color: kValmetDarkGrey, thickness: 1),
@@ -115,14 +130,18 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.only(left: 12.0),
               child: TextButton.icon(
                 onPressed: () {},
-                icon: const Icon(Icons.arrow_back,
-                    color: Colors.white, size: 20),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 label: const Text(
                   'Sair',
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500),
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white,
@@ -131,11 +150,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              width: 1.5,
-              height: 30,
-              color: Colors.white54,
-            ),
+            Container(width: 1.5, height: 30, color: Colors.white54),
             const Spacer(),
             const Text(
               'Valmet',
@@ -153,10 +168,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainButton(
-      {required IconData icon,
-        required String text,
-        required VoidCallback onPressed}) {
+  Widget _buildMainButton({
+    required IconData icon,
+    required String text,
+    required VoidCallback onPressed,
+  }) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -172,11 +188,7 @@ class HomeScreen extends StatelessWidget {
         children: [
           Icon(icon, size: 30, color: kValmetTextDark),
           const SizedBox(width: 16),
-          Container(
-            width: 1.5,
-            height: 30,
-            color: kValmetDarkGrey,
-          ),
+          Container(width: 1.5, height: 30, color: kValmetDarkGrey),
           const SizedBox(width: 16),
           Text(
             text,
@@ -191,11 +203,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSecondaryButton(
-      {required String text,
-        required Color color,
-        required VoidCallback onPressed,
-        IconData? icon}) {
+  Widget _buildSecondaryButton({
+    required String text,
+    required Color color,
+    required VoidCallback onPressed,
+    IconData? icon,
+  }) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -214,9 +227,10 @@ class HomeScreen extends StatelessWidget {
             Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 8),
           ],
-          Text(text,
-              style:
-              const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
