@@ -4,6 +4,7 @@ import 'exemplos_screen.dart';
 import 'introducao_screen.dart';
 import 'theme_colors.dart';
 import 'funcionamento_screen.dart';
+import 'lado2_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -101,7 +102,14 @@ class HomeScreen extends StatelessWidget {
               _buildSecondaryButton(
                 text: 'Usar régua',
                 color: kValmetRed,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Lado2Screen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               _buildSecondaryButton(
