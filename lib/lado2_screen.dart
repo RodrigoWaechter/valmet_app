@@ -4,12 +4,33 @@ import 'package:flutter/services.dart';
 import 'lado1_screen.dart';
 import 'theme_colors.dart';
 
+const double kFixedVelocityWidth = 150.0;
+const double kPowerBoxGap = 16.0;
+
+const double kLineHeight = 20.0;
+const double kMaxPowerLabelSpace = 25.0; // espaço para a label Potência Máxima
+const double kBarHeight = 50.0; // altura da barra preta
+const double kBarTopY = kMaxPowerLabelSpace; //
+
+// mapa de marcadores label
+const Map<String, ({double ratio, Color color, FontStyle style})> kPowerPositions = {
+  // marcadores de solo (pretos)
+  'Fofo/Solto': (ratio: 0.05, color: kValmetTextDark, style: FontStyle.normal),
+  'Cultivado': (ratio: 0.11, color: kValmetTextDark, style: FontStyle.normal),
+  'Firme': (ratio: 0.18, color: kValmetTextDark, style: FontStyle.normal),
+
+  // marcadores de Potência (vermelhos, itálico)
+  'TDP': (ratio: 0.50, color: kValmetRed, style: FontStyle.italic),
+  'Motor': (ratio: 0.60, color: kValmetRed, style: FontStyle.italic),
+};
+
+
 class Lado2Screen extends StatelessWidget {
   const Lado2Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // força a orientação para o modo paisagem (Landscape)
+    // força a orientação para o modo paisagem
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -25,26 +46,64 @@ class Lado2Screen extends StatelessWidget {
             _buildTopBar(context),
 
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    _buildImplementTypeBox(),
-                    const SizedBox(height: 8),
-                    _buildSummaryBox(),
-                    const SizedBox(height: 8),
-                    _buildSoilTypeBox(),
-                    const SizedBox(height: 8),
-                    _buildPowerBox(),
-                    const SizedBox(height: 8),
-                    _buildTractionForceBox(),
-                  ],
-                ),
-              ),
+              child: LayoutBuilder(
+                  builder: (context, constraints) {
+
+                    // variáveis para o calculo da largura real
+                    const double contentPadding = 8.0;
+                    const double boxInternalPadding = 12.0;
+
+                    // largura total disponível
+                    final double availableWidth = constraints.maxWidth - 2 * contentPadding;
+
+                    // largura do recorte de referência (100% da régua)
+                    final double fullRulerWidth = availableWidth - 2 * boxInternalPadding;
+
+                    const int totalSegments = 10;
+                    final double segmentWidth = fullRulerWidth / totalSegments;
+
+                    // largura do recorte para "potência na barra de tração" (equivalente a 7,0 = 4 segmentos)
+                    final double widthFor7_0 = 4 * segmentWidth;
+
+                    // largura para "potência (cv)" (equivalente a 4,0 = 7 segmentos)
+                    final double widthFor4_0 = 7 * segmentWidth;
+
+                    // conteúdo scrollável
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(contentPadding),
+                      child: Column(
+                        children: [
+                          _buildImplementTypeBox(),
+                          const SizedBox(height: 8),
+                          _buildSummaryBox(),
+                          const SizedBox(height: 8),
+
+                          // box 'potência (cv)' - com todos os marcadores
+                          _buildPotenciaBox(widthFor4_0),
+                          const SizedBox(height: 8),
+
+                          // box 'potência na barra (cv)' - com largura fixa
+                          _buildPowerBox(widthFor7_0),
+                          const SizedBox(height: 8),
+
+                          // box 'força de tração total' (referência)
+                          _buildTractionForceBox(fullRulerWidth),
+                        ],
+                      ),
+                    );
+                  }),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  // desenha uma linha vertical
+  Widget _buildVerticalLine({required double height, required Color color}) {
+    return CustomPaint(
+      size: Size(1.0, height),
+      painter: _LinePainter(color: color),
     );
   }
 
@@ -183,6 +242,7 @@ class Lado2Screen extends StatelessWidget {
               text: 'informações tiradas da régua sobreposta',
               isBlackBox: true, // simula o recorte
               height: 50,
+              flex: 1,
             ),
           ),
           const SizedBox(width: 10),
@@ -193,6 +253,7 @@ class Lado2Screen extends StatelessWidget {
               text: 'kgf/m de ...',
               isBlackBox: true, // simula o recorte
               height: 50,
+              flex: 1,
             ),
           ),
         ],
@@ -200,107 +261,245 @@ class Lado2Screen extends StatelessWidget {
     );
   }
 
-  Widget _buildSoilTypeBox() {
+  Widget _buildPotenciaBox(double targetWidth) {
+    const double totalStackHeight = kMaxPowerLabelSpace + kBarHeight + kLineHeight + 10;
+
     return _buildBox(
-      title: 'Tipos de Solo:',
-      content: Row(
+      title: "Tipos de Solo:",
+      content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // texto fixo
+
           const Text(
             'Potência (cv)',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(height: 8),
 
-          // área de seleção/visualização principal
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // rótulos originais
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // área principal
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Fofo/Solto', style: TextStyle(fontSize: 12)),
-                    Text('Cultivado', style: TextStyle(fontSize: 12)),
-                    Text('Firme', style: TextStyle(fontSize: 12)),
-                    Text('Potência Máxima', style: TextStyle(fontSize: 12, color: kValmetRed)),
-                    Text('TDP', style: TextStyle(fontSize: 12, color: kValmetRed)),
-                    Text('Motor', style: TextStyle(fontSize: 12, color: kValmetRed)),
+
+                    SizedBox(
+                      height: totalStackHeight,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+
+                          // label 'Potência Máxima' (acima da barra)
+                          _buildPowerRangeLabel(targetWidth),
+
+                          // recorte da régua
+                          Positioned(
+                            left: 0,
+                            top: kBarTopY,
+                            child: Container(
+                              height: kBarHeight,
+                              width: targetWidth,
+                              color: Colors.black,
+                            ),
+                          ),
+
+                          // marcadores de solo, tdp e motor
+                          ..._buildPowerBarMarkers(targetWidth),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 5),
-                // área de recorte da régua
-                Container(
-                  height: 50,
-                  color: Colors.black, // simula o recorte
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
+              ),
 
-          // texto 'DITA' como no design
-          const Text(
-            'DITA',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: kValmetRed,
-              fontStyle: FontStyle.italic,
-            ),
+              const SizedBox(width: 10),
+
+              // texto 'DITA'
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text(
+                  'DITA',
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: kValmetRed,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPowerBox() {
+  // função para criar o label "Potência Máxima" no lugar correto
+  Widget _buildPowerRangeLabel(double containerWidth) {
+
+    final double startRatio = kPowerPositions['TDP']!.ratio;
+    final double endRatio = kPowerPositions['Motor']!.ratio;
+
+    final double startX = containerWidth * startRatio;
+    final double rangeWidth = containerWidth * (endRatio - startRatio);
+    final double midPoint = startX + (rangeWidth / 2);
+
+    return Positioned(
+      left: midPoint,
+      top: 0,
+      child: Transform.translate(
+        // desloca o texto para a esquerda pela metade de sua própria largura
+        offset: const Offset(-50, 0),
+        child: const Text(
+          'Potência Máxima',
+          style: TextStyle(
+            color: kValmetRed,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+          maxLines: 1, // garante que o texto fique em uma linha só
+          overflow: TextOverflow.visible,
+        ),
+      ),
+    );
+  }
+
+  // função para criar as linhas e as labels de todos os marcadores (Solo, TDP, Motor)
+  List<Widget> _buildPowerBarMarkers(double containerWidth) {
+
+    // posições base
+    const double barY = kBarTopY;
+    const double barHeight = kBarHeight;
+    const double lineHeight = kLineHeight;
+
+    // posições Y dos elementos
+    const double topLabelY = 0; // para 'Cultivado'
+    const double topLineStart = barY - lineHeight;
+    const double bottomLineStart = barY + barHeight;
+    const double bottomLabelY = bottomLineStart + lineHeight + 2;
+
+    List<Widget> markers = [];
+
+    kPowerPositions.forEach((label, config) {
+      final double xPosition = containerWidth * config.ratio;
+
+      final bool isCultivado = label == 'Cultivado';
+
+      double lineStart;
+      double labelY;
+      double lineLength;
+      double labelOffsetX = -20; // offset padrão para centralizar labels de 4-5 caracteres
+
+      if (isCultivado) {
+
+        lineStart = barY - (lineHeight * 0.7); // reduz a linha vertical do "Cultivado"
+        labelY = topLabelY;
+        lineLength = lineHeight * 0.7; // a linha é mais curta
+        labelOffsetX = -25; // ajuste fino
+      } else {
+        // marcadores Fofo/Solto, Firme, TDP, Motor vão para baixo
+        lineStart = bottomLineStart;
+        labelY = bottomLabelY;
+        lineLength = lineHeight;
+        if (label == 'Fofo/Solto') {
+          labelOffsetX = -25;
+        } else if (label == 'TDP') {
+          labelOffsetX = -15;
+        } else if (label == 'Motor') {
+          labelOffsetX = -18;
+        } else if (label == 'Firme') {
+          labelOffsetX = -15;
+        }
+      }
+
+      // linha vertical
+      markers.add(
+        Positioned(
+          left: xPosition,
+          top: lineStart,
+          child: _buildVerticalLine(height: lineLength, color: config.color),
+        ),
+      );
+
+      // label de texto
+      markers.add(
+        Positioned(
+          left: xPosition,
+          top: labelY,
+          child: Transform.translate(
+            offset: Offset(labelOffsetX, 0),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: config.color,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                fontStyle: config.style,
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+
+    return markers;
+  }
+
+  Widget _buildPowerBox(double targetWidth) {
     return _buildBox(
       title: 'Potência na Barra de Tração (cv)',
       content: Row(
         children: [
-          // área de recorte da régua
-          Expanded(
-            child: Container(
-              height: 50,
-              color: Colors.black, // simula o recorte
-            ),
-          ),
-          const SizedBox(width: 10),
-          // velocidade típica (área de texto)
-          _buildInfoDisplay(
-            label: 'Vel. típica (km/h)',
-            text: '0,0',
-            isBlackBox: true, // simula o recorte
+          // recorte da régua
+          Container(
             height: 50,
-            flex: 0,
-            width: 150,
+            width: targetWidth,
+            color: Colors.black, // simula o recorte
+          ),
+
+          // gap entre os retângulos
+          const SizedBox(width: kPowerBoxGap),
+
+          // velocidade Típica (Largura fixa)
+          Container(
+            width: kFixedVelocityWidth,
+            child: _buildInfoDisplay(
+              label: 'Velocidade típica (km/h)',
+              text: '0,0',
+              isBlackBox: true,
+              height: 50,
+              flex: 0,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTractionForceBox() {
+  Widget _buildTractionForceBox(double fullWidth) {
+    // box 'força de tração total (kgf)'
+
     return _buildBox(
       title: 'Força de Tração Total (kgf)',
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // área de recorte da régua
+          // area de recorte da régua - largura total (referência)
           Container(
             height: 50,
-            width: double.infinity,
+            width: fullWidth, // largura total (100% da referência)
             color: Colors.black, // simula o recorte
           ),
           const SizedBox(height: 5),
+
           // velocidade (km/h)
           const Text(
             'Velocidade (km/h)',
             style: TextStyle(fontSize: 12, color: kValmetTextDark),
           ),
+
           // eixos de régua
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -331,6 +530,8 @@ class Lado2Screen extends StatelessWidget {
     int flex = 1,
     bool isBlackBox = false,
   }) {
+
+    // widget para exibir informações de resumo
     final content = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,4 +568,25 @@ class Lado2Screen extends StatelessWidget {
 
     return flex > 0 ? Expanded(flex: flex, child: box) : box;
   }
+}
+
+class _LinePainter extends CustomPainter {
+  final Color color;
+
+  _LinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.butt;
+
+    // desenha a linha de 0 até a largura total
+    canvas.drawLine(Offset(size.width / 2, 0), Offset(size.width / 2, size.height), paint);
+
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
