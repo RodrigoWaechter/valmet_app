@@ -5,6 +5,7 @@ import 'introducao_screen.dart';
 import 'theme_colors.dart';
 import 'funcionamento_screen.dart';
 import 'lado2_screen.dart';
+import 'about_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -116,7 +117,13 @@ class HomeScreen extends StatelessWidget {
                 text: 'Sobre',
                 color: kValmetDarkGrey,
                 icon: Icons.info_outline,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AboutScreen()),
+                  );
+                },
               ),
             ],
           ),
