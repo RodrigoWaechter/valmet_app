@@ -36,7 +36,10 @@ class LogRuler extends StatelessWidget {
         if (title.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         SizedBox(
           height: 70, // altura da régua
@@ -87,48 +90,42 @@ class _RulerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint linePaint = Paint()
       ..color = Colors.black
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 1.5;
 
     final Paint majorPaint = Paint()
       ..color = Colors.black
-      ..strokeWidth = 1.5;
+      ..strokeWidth = 2.5;
 
     final double w = size.width;
     final double h = size.height;
 
-    // a régua está dentro de um recorte, então não desenhamos a linha base.
-    // o recorte da barra preta do Lado 2 será o que define a linha base visualmente.
-
-    // 1. gerar e desenhar ticks menores (ranges)
     for (var range in ranges) {
-      // floor evita problemas de ponto flutuante no loop
       int steps = ((range.end - range.start) / range.step).floor();
       for (int i = 0; i <= steps; i++) {
         double val = range.start + (i * range.step);
 
-        // garante que o valor esteja dentro do range principal [minVal, maxVal]
         if (val < minVal || val > maxVal) continue;
 
         double x = _getX(val, w);
-        // desenha traço curto (tick nenor) - altura 1/6 da régua
-        canvas.drawLine(Offset(x, h), Offset(x, h - (h / 6)), linePaint);
+        canvas.drawLine(Offset(x, h), Offset(x, h - (h / 4.0)), linePaint);
       }
     }
 
-    // 2. desenhar labels principais (texto e traço longo)
-    final textStyle = const TextStyle(color: Colors.black, fontSize: 10);
+    final textStyle = const TextStyle(
+      color: Colors.black,
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+    );
 
     for (var label in majorLabels) {
       if (label < minVal || label > maxVal) continue;
 
       double x = _getX(label, w);
 
-      // traço longo (tick maior) - altura 1/3 da régua
-      canvas.drawLine(Offset(x, h), Offset(x, h - (h / 3)), majorPaint);
+      canvas.drawLine(Offset(x, h), Offset(x, h - (h / 2.5)), majorPaint);
 
-      // desenhar Texto
       final TextSpan textSpan = TextSpan(
-        text: label.toStringAsFixed(label % 1 == 0 ? 0 : 1), // remove casas decimais se for inteiro
+        text: label.toStringAsFixed(label % 1 == 0 ? 0 : 1),
         style: textStyle,
       );
       final TextPainter textPainter = TextPainter(
@@ -137,8 +134,13 @@ class _RulerPainter extends CustomPainter {
       );
       textPainter.layout();
 
-      // centralizar texto no tick e posicionar acima da régua
-      textPainter.paint(canvas, Offset(x - (textPainter.width / 2), h - (h / 3) - textPainter.height - 5));
+      textPainter.paint(
+        canvas,
+        Offset(
+          x - (textPainter.width / 2),
+          h - (h / 2.5) - textPainter.height - 2,
+        ),
+      );
     }
   }
 
