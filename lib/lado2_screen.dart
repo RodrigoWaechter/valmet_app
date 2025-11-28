@@ -10,26 +10,13 @@ import 'ruler_log_painter.dart';
 // CONSTANTES DE LAYOUT E CONFIGURAÇÃO
 // ============================================================================
 
-/// largura fixa para a caixa de texto de velocidade, impedindo que ela se expanda
-const double kFixedVelocityWidth = 150.0;
-
-/// espaçamento horizontal entre a régua e a caixa de velocidade
-const double kPowerBoxGap = 16.0;
-
-/// altura da linha vertical dos marcadores (TDP, Motor, Solos)
-const double kLineHeight = 20.0;
-
-/// espaço reservado acima da barra preta para o label "Potência Máxima"
-const double kMaxPowerLabelSpace = 25.0;
-
-/// altura da barra preta (recorte visual da régua).
-const double kBarHeight = 50.0;
-
-/// posição Y (topo) onde a barra preta começa dentro do stack
-const double kBarTopY = kMaxPowerLabelSpace;
-
-/// largura total virtual da régua desenhada (deve ser grande o suficiente para cobrir toda a escala)
-const double kRulerTotalWidth = 5000.0;
+const double kFixedVelocityWidth = 150.0;     // largura fixa para a caixa de texto de velocidade, impedindo que ela se expanda
+const double kPowerBoxGap = 16.0;             // espaçamento horizontal entre a régua e a caixa de velocidade
+const double kLineHeight = 20.0;              // altura da linha vertical dos marcadores (TDP, Motor, Solos)
+const double kMaxPowerLabelSpace = 25.0;      // espaço reservado acima da barra preta para o label "Potência Máxima"
+const double kBarHeight = 50.0;               // altura da barra preta (recorte visual da régua)
+const double kBarTopY = kMaxPowerLabelSpace;  // posição Y (topo) onde a barra preta começa dentro do stack
+const double kRulerTotalWidth = 3000.0;       // largura total virtual da régua desenhada
 
 /// mapa de configuração dos marcadores sobre a régua de potência
 /// contém a razão (0.0 a 1.0) da posição horizontal, a cor e o estilo do texto
@@ -39,6 +26,29 @@ const Map<String, ({double ratio, Color color, FontStyle style})> kPowerPosition
   'Firme': (ratio: 0.18, color: kValmetTextDark, style: FontStyle.normal),
   'TDP': (ratio: 0.50, color: kValmetRed, style: FontStyle.italic),
   'Motor': (ratio: 0.60, color: kValmetRed, style: FontStyle.italic),
+};
+
+// ============================================================================
+// DADOS DOS IMPLEMENTOS
+// ============================================================================
+
+// mapa com as informações estáticas para cada tipo de implemento
+const Map<String, Map<String, String>> kImplementData = {
+  'Subsolador': {
+    'textura': 'Massapé (2050), Argiloso (1600), Misto (1400), Arenoso (1100)',
+    'esforco': 'kgf/m de largura de corte',
+    'velocidade': '5,0 a 8,0',
+  },
+  'Grade de Disco': {
+    'textura': ' Argiloso firme (1,4) \n Misto firme, Argiloso cultivado ou arenoso (1,2) \n Misto cultivado (1,0)',
+    'esforco': 'kgf/kg de peso da grade\n\n',
+    'velocidade': 'Aradora (5,0 a 7,0)  Intermediária (6,0 a 9,0)  Niveladora (8,0 a 12,0)',
+  },
+  'Arado': {
+    'textura': 'Argiloso (23), Misto (15)',
+    'esforco': 'kgf/cm de profundidade/haste',
+    'velocidade': '4,0 a 6,0'
+  },
 };
 
 // ============================================================================
@@ -59,6 +69,7 @@ class _Lado2ScreenState extends State<Lado2Screen> {
 
   /// limite máximo de scroll calculado com base na largura da régua
   final double _maxScrollExtent = kRulerTotalWidth - 400.0;
+  String _selectedImplement = 'Subsolador';
 
   @override
   void dispose() {
@@ -81,6 +92,12 @@ class _Lado2ScreenState extends State<Lado2Screen> {
       // aplica limites (clamp) para não sair da área da régua
       if (_scrollOffset < 0) _scrollOffset = 0;
       if (_scrollOffset > _maxScrollExtent) _scrollOffset = _maxScrollExtent;
+    });
+  }
+
+  void _onImplementSelected(String implementName) {
+    setState(() {
+      _selectedImplement = implementName;
     });
   }
 
@@ -294,45 +311,52 @@ class _Lado2ScreenState extends State<Lado2Screen> {
       content: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _buildTypeButton('Subsolador', false),
+          _buildTypeButton('Subsolador'),
           const SizedBox(width: 4),
-          _buildTypeButton('Grade de Disco', false),
+          _buildTypeButton('Grade de Disco'),
           const SizedBox(width: 4),
-          _buildTypeButton('Arado', true),
+          _buildTypeButton('Arado'),
         ],
       ),
     );
   }
 
-  Widget _buildTypeButton(String text, bool isSelected) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isSelected ? kValmetRed : kValmetButtonGrey,
-        borderRadius: BorderRadius.circular(8),
-        border: isSelected ? Border.all(color: kValmetRed, width: 2) : null,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isSelected ? Colors.white : kValmetTextDark,
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
+  Widget _buildTypeButton(String text) {
+    final bool isSelected = _selectedImplement == text;
+
+    return GestureDetector(
+      onTap: () => _onImplementSelected(text),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected ? kValmetRed : kValmetButtonGrey,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected ? Border.all(color: kValmetRed, width: 2) : null,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isSelected ? Colors.white : kValmetTextDark,
+            fontSize: 13,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildSummaryBox() {
-    // box informativo
+    // busca os dados do mapa com base no implemento selecionado
+    final data = kImplementData[_selectedImplement]!;
+
     return _buildBox(
       title: 'Resumo do tipo de implemento selecionado',
       content: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: _buildInfoDisplay(
               label: 'Textura do solo:',
-              text: 'informações tiradas da régua sobreposta',
+              text: data['textura']!,
               isBlackBox: true,
               height: 50,
             ),
@@ -341,7 +365,7 @@ class _Lado2ScreenState extends State<Lado2Screen> {
           Expanded(
             child: _buildInfoDisplay(
               label: 'Esforço requerido em:',
-              text: 'kgf/m de ...',
+              text: data['esforco']!,
               isBlackBox: true,
               height: 50,
             ),
@@ -435,6 +459,10 @@ class _Lado2ScreenState extends State<Lado2Screen> {
 
   /// constrói o box de "Potência na Barra" contendo a escala central.
   Widget _buildPowerBox(double targetWidth) {
+
+    // busca a velocidade do mapa de dados
+    final data = kImplementData[_selectedImplement]!;
+
     // configuração da escala central: 10 a 150
     final List<double> labels = [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 150];
     final List<TickRange> ranges = [
@@ -449,14 +477,30 @@ class _Lado2ScreenState extends State<Lado2Screen> {
       title: 'Potência na Barra de Tração (cv)',
       content: Row(
         children: [
-          // janela da Régua
-          _buildRulerWindow(
-            targetWidth,
-            minVal: 10,
-            maxVal: 150,
-            majorLabels: labels,
-            ranges: ranges,
+          // stack para sobreposição da linha de orientação
+          Stack(
+            alignment: Alignment.center, // centraliza a linha vermelha
+            clipBehavior: Clip.none,
+            children: [
+              // 1. a régua em si
+              _buildRulerWindow(
+                targetWidth,
+                minVal: 10,
+                maxVal: 150,
+                majorLabels: labels,
+                ranges: ranges,
+              ),
+
+              // 2. a linha vermelha
+              Container(
+                width: 2.0,
+                height: 70.0,
+                color: kValmetRed,
+              )
+            ],
           ),
+          // janela da Régua
+
 
           const SizedBox(width: kPowerBoxGap),
 
@@ -465,7 +509,7 @@ class _Lado2ScreenState extends State<Lado2Screen> {
             width: kFixedVelocityWidth,
             child: _buildInfoDisplay(
               label: 'Velocidade típica (km/h)',
-              text: '0,0',
+              text: data['velocidade']!,
               isBlackBox: true,
               height: 50,
               flex: 0,
