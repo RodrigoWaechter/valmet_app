@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'exemplos_screen.dart';
 import 'introducao_screen.dart';
@@ -144,7 +145,9 @@ class HomeScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: TextButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  SystemNavigator.pop();
+                },
                 icon: const Icon(
                   Icons.arrow_back,
                   color: Colors.white,
