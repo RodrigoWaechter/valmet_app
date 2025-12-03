@@ -100,14 +100,21 @@ class _RulerPainter extends CustomPainter {
     final double h = size.height;
 
     for (var range in ranges) {
-      int steps = ((range.end - range.start) / range.step).floor();
-      for (int i = 0; i <= steps; i++) {
-        double val = range.start + (i * range.step);
+      // Cálculo robusto de steps para evitar imprecisão de ponto flutuante
+      double current = range.start;
+      while (current <= range.end) {
 
-        if (val < minVal || val > maxVal) continue;
+        if (current >= minVal && current <= maxVal) {
+          double x = _getX(current, w);
+          // Altura segura: h / 4.0
+          canvas.drawLine(Offset(x, h), Offset(x, h - (h / 4.0)), linePaint);
+        }
 
-        double x = _getX(val, w);
-        canvas.drawLine(Offset(x, h), Offset(x, h - (h / 4.0)), linePaint);
+        current += range.step;
+        // Arredonda para garantir que o loop termine precisamente no 'end'
+        if ((current - range.end).abs() < range.step * 0.001 && current > range.end) {
+          break;
+        }
       }
     }
 

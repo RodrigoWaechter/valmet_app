@@ -39,6 +39,7 @@ class _ExamplesScreenState extends State<ExamplesScreen>
         color: kValmetRed,
         child: Column(
           children: [
+            // área do título e botão voltar
             Container(
               padding: EdgeInsets.only(top: topPadding),
               height: titleHeight + topPadding,
@@ -57,6 +58,20 @@ class _ExamplesScreenState extends State<ExamplesScreen>
                       },
                     ),
                   ),
+
+                  // header da tela
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12.0),
+                    child: Text(
+                      'Exemplos',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                     ),
+                    ),
+
                   const Spacer(),
                   const Text(
                     'Valmet',
@@ -71,6 +86,8 @@ class _ExamplesScreenState extends State<ExamplesScreen>
                 ],
               ),
             ),
+
+            // aba LADO 1 e LADO 2
             Container(
               height: tabBarHeight,
               color: kValmetRed,
@@ -139,24 +156,62 @@ class _ExamplesScreenState extends State<ExamplesScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // título da seção
         Text(
           title,
           style: TextStyle(
             color: kValmetTextDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 12),
         const Divider(color: kValmetDarkGrey, thickness: 1),
         const SizedBox(height: 12),
-        Text(
-          content,
-          style: TextStyle(color: kValmetTextDark, fontSize: 16, height: 1.5),
+
+
+        RichText(
+          text: TextSpan(
+            style: TextStyle(color: kValmetTextDark, fontSize: 16, height: 1.5),
+            children: _formatContentWithSteps(content), // função de formatação
+          ),
         ),
         const SizedBox(height: 30),
       ],
     );
+  }
+
+  List<TextSpan> _formatContentWithSteps(String content) {
+    final List<TextSpan> spans = [];
+    // capturar padrões como "1º Passo:", "2º Passo:", "1.º Passo:", "5. Passo:", "1. Exemplo:"
+    final RegExp stepRegex = RegExp(r'(\d+[\.º]?\s*Passo:|^\d+[\.º]?\s*Passo:|^\d+\.\s*Exemplo:|^\d+\.\s*Passo:|^\d+\.\s*Passo:)',
+        multiLine: true);
+
+    int lastMatchEnd = 0;
+
+    for (final match in stepRegex.allMatches(content)) {
+      // 1. adiciona o texto ANTES do passo (em estilo normal)
+      if (match.start > lastMatchEnd) {
+        spans.add(TextSpan(text: content.substring(lastMatchEnd, match.start)));
+      }
+
+      // 2. adiciona o texto do PASSO (em negrito)
+      spans.add(
+        TextSpan(
+          text: match.group(0),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+
+      lastMatchEnd = match.end;
+    }
+
+    // 3. adiciona o texto APÓS o último passo
+    if (lastMatchEnd < content.length) {
+      spans.add(TextSpan(text: content.substring(lastMatchEnd)));
+    }
+
+    return spans;
   }
 
   @override
@@ -172,6 +227,10 @@ class _ExamplesScreenState extends State<ExamplesScreen>
     );
   }
 }
+
+// =======================================================
+// CONTEÚDO
+// =======================================================
 
 const String _lado1Exemplo1Content = '''
 Que largura de corte deve ter um implemento com o qual o trator opera a 6,5 km/h, para que possamos trabalhar 500 ha em 25 dias úteis de 8 horas, estimando-se uma eficiência de 80%?
@@ -192,17 +251,17 @@ Com a marca de 2,5 ha/h alinhada com 80%, leia na escala da Largura de Corte do 
 const String _lado1Exemplo2Content = '''
 Observando um trator em operação, anotei o tempo de 100 segundos (1 minuto e 40 segundos), que levou para percorrer uma distância de 300 metros. Medi uma passada do implemento e verifiquei que a largura de corte era de 2,4 metros. Conversando com o proprietário, este me disse que em 10 dias de 8 horas de trabalho diário, conseguiu preparar 160 ha. Qual foi a eficiência deste conjunto?
 
-1.º Passo: Calcular a Velocidade do Trator
+1º Passo: Calcular a Velocidade do Trator
 No conjunto de escalas "Determinação da Velocidade (B)", posicione a Distância (d) 300 m com o Tempo (t) 100 s e leia no indicador "D" a Velocidade 10,8 km/h (aprox.).
 
 2º Passo: Calcular a Capacidade de Campo Teórica (CT)
 Nas escalas de Velocidade e Largura de Corte faça coincidir 10,8 km/h com 2,4 m (do exemplo) e leia a CT de 2,6 ha/h, no ponto de coincidência com 100%.
 
-3.º Passo: Calcular a Capacidade de Campo Efetiva (CE)
+3º Passo: Calcular a Capacidade de Campo Efetiva (CE)
 10 dias x 8 horas/dia = 80 h
 Faça coincidir a Área (160 ha) com o Tempo (80 h) e leia no ponto de 100% de Eficiência, o valor da CE = 2,0 ha/h.
 
-4.º Passo: Calcular a Eficiência (E)
+4º Passo: Calcular a Eficiência (E)
 Desloque a escala de Capacidade de Campo para a esquerda até que o valor da CT de 2,6 ha/h, coincida com o valor de 100% de Eficiência. Em seguida, leia o valor da Eficiência, que coincidiu com a CE = 2,0 ha/h, que é o valor de 77% (aprox.)
 ''';
 
@@ -249,7 +308,7 @@ Velocidade Típica: 5,0 a 7,0 km/h. Estimamos V = 6,0 km/h.
 2º Passo: Calcular a PBTex
 Posicione 2.280 kgf com 6,0 km/h. Leia na seta "E", PBTex = 50,5 cv.
 
-3.º Passo: Calcular a Pmax no Motor
+3º Passo: Calcular a Pmax no Motor
 Posicione 50,5 cv na linha de Solo Firme. Na linha "Motor" encontramos Pmax = 92 cv (para 4x2).
 Caso 4x4: Pmax(4x4) = 92cv / 1,15 = 80 cv.
 ''';
@@ -268,17 +327,17 @@ Faça coincidir 95 cv (potência do 980) com a linha Motor.
 Leia na linha Solo Firme: PBT = 52 cv.
 Como é 4x4: PBT = 52 cv x 1,15 = 60 cv.
 
-3.º Passo: Calcular FT do trator (Lado 2)
+3º Passo: Calcular FT do trator (Lado 2)
 Faça coincidir PBT (60cv) com a seta "E". Leia na escala Força de Tração, na Velocidade de 5,1 km/h: FT = 3.200 kgf (aprox.).
 
-4.º Passo: Achar n.º de hastes (Lado 2)
+4º Passo: Achar n.º de hastes (Lado 2)
 Nº de hastes = 3.200 kgf / 600 kgf/haste = 5,33 hastes => 5 hastes.
 
-5. Passo: Calcular Capacidade de Campo Efetiva (CE) (Lado 1)
+5º Passo: Calcular Capacidade de Campo Efetiva (CE) (Lado 1)
 Na escala da Área/Horas, coincida 150 ha com 200 h.
 Leia na linha 100% de E: CE = 0,75 ha/h.
 
-6. Passo: Calcular CT e Largura de Corte (Lc) (Lado 1)
+6º Passo: Calcular CT e Largura de Corte (Lc) (Lado 1)
 Desloque até CE (0,75 ha/h) coincidir com 60% (Eficiência).
 Leia no indicador 100%: CT = 1,28 ha/h.
 Na escala de Largura de Corte, leia o valor que coincide com V = 5,1 km/h: Lc = 2,5m.
