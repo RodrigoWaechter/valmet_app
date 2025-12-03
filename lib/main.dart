@@ -6,6 +6,7 @@ import 'introducao_screen.dart';
 import 'theme_colors.dart';
 import 'funcionamento_screen.dart';
 import 'lado2_screen.dart';
+import 'lado1_screen.dart';
 import 'about_screen.dart';
 
 void main() {
@@ -59,7 +60,9 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               const Divider(color: kValmetDarkGrey, thickness: 1),
-              const SizedBox(height: 20),
+              const SizedBox(height: 100),
+
+              // bloco de botões principais
               _buildMainButton(
                 icon: Icons.menu_book,
                 text: 'Introdução',
@@ -98,7 +101,10 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 20),
+
+              // empurra o conteúdo um pouco para baixo
+              const SizedBox(height: 100),
+
               const Divider(color: kValmetDarkGrey, thickness: 1),
               const SizedBox(height: 30),
               _buildSecondaryButton(
@@ -107,9 +113,7 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const Lado2Screen(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const Lado1Screen()),
                   );
                 },
               ),
@@ -121,8 +125,7 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const AboutScreen()),
+                    MaterialPageRoute(builder: (context) => const AboutScreen()),
                   );
                 },
               ),

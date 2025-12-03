@@ -149,11 +149,6 @@ class FuncionamentoScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 6.0, right: 10.0),
-            child: Icon(
-              Icons.check_circle_outline,
-              size: 16,
-              color: kValmetTextDark.withOpacity(0.8),
-            ),
           ),
           Expanded(
             child: Column(

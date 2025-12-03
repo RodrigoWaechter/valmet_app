@@ -16,7 +16,8 @@ const double kLineHeight = 20.0;              // altura da linha vertical dos ma
 const double kMaxPowerLabelSpace = 25.0;      // espaço reservado acima da barra preta para o label "Potência Máxima"
 const double kBarHeight = 50.0;               // altura da barra preta (recorte visual da régua)
 const double kBarTopY = kMaxPowerLabelSpace;  // posição Y (topo) onde a barra preta começa dentro do stack
-const double kRulerTotalWidth = 3000.0;       // largura total virtual da régua desenhada
+const double kRulerTotalWidth = 2000.0;       // largura total virtual da régua desenhada
+const double kRuleInitialOffset = 15.0;       // espaço na lateral esquerda para evitar que o primeiro número seja cortado
 
 /// mapa de configuração dos marcadores sobre a régua de potência
 /// contém a razão (0.0 a 1.0) da posição horizontal, a cor e o estilo do texto
@@ -71,6 +72,14 @@ class _Lado2ScreenState extends State<Lado2Screen> {
   final double _maxScrollExtent = kRulerTotalWidth - 400.0;
   String _selectedImplement = 'Subsolador';
 
+  bool _isLandscapeMode = false;
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   void dispose() {
     // restaura a orientação do dispositivo para vertical/livre ao sair desta tela
@@ -85,11 +94,18 @@ class _Lado2ScreenState extends State<Lado2Screen> {
   /// atualiza o [_scrollOffset] baseado no movimento horizontal do user
   void _handleDragUpdate(DragUpdateDetails details) {
     setState(() {
-      // subtraímos o delta porque arrastar para a esquerda (delta negativo)
-      // deve aumentar o offset (avançar na régua)
+
+      if (!_isLandscapeMode) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+        _isLandscapeMode = true;
+      }
+
       _scrollOffset -= details.primaryDelta!;
 
-      // aplica limites (clamp) para não sair da área da régua
+      // aplica limites para não sair da área da régua
       if (_scrollOffset < 0) _scrollOffset = 0;
       if (_scrollOffset > _maxScrollExtent) _scrollOffset = _maxScrollExtent;
     });
@@ -133,23 +149,26 @@ class _Lado2ScreenState extends State<Lado2Screen> {
       width: width,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.white, // Fundo branco para garantir contraste com as linhas
-        border: Border.all(color: Colors.black, width: 2), // Borda preta do recorte
+        color: Colors.white,
+        border: Border.all(color: Colors.black, width: 2), // borda preta do recorte
       ),
-      // ClipRect impede que a régua "vaze" para fora do quadrado
+
       child: ClipRect(
         child: Transform.translate(
           // a régua é movida inteira para a esquerda
-          offset: Offset(-_scrollOffset, 0),
+          offset: Offset(kRuleInitialOffset - _scrollOffset, 0),
           child: OverflowBox(
             // alinhamento inferior para garantir que os tracinhos apareçam
             alignment: Alignment.bottomLeft,
             // permite que o filho (a régua de 5000px) seja maior que o pai (o recorte)
-            maxWidth: kRulerTotalWidth,
-            minWidth: kRulerTotalWidth,
+            maxWidth: kRulerTotalWidth + kRuleInitialOffset,
+            minWidth: kRulerTotalWidth + kRuleInitialOffset,
             maxHeight: 70, // altura real do desenho da régua (maior que o recorte para caber labels)
             minHeight: 70,
-            child: ruler,
+            child: Padding(
+                padding: const EdgeInsets.only(left: kRuleInitialOffset),
+                  child: ruler,
+            ),
           ),
         ),
       ),
@@ -158,11 +177,6 @@ class _Lado2ScreenState extends State<Lado2Screen> {
 
   @override
   Widget build(BuildContext context) {
-    // força modo paisagem ao construir a tela
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
 
     return Scaffold(
       backgroundColor: kValmetBeige,
@@ -190,7 +204,6 @@ class _Lado2ScreenState extends State<Lado2Screen> {
                   final double widthFor7_0 = 4 * segmentWidth; // 40%
                   final double widthFor4_0 = 7 * segmentWidth; // 70%
 
-                  // GestureDetector envolve  o scrollview para capturar o toque em qualquer lugar
                   return GestureDetector(
                     onHorizontalDragUpdate: _handleDragUpdate,
                     child: SingleChildScrollView(
@@ -349,7 +362,7 @@ class _Lado2ScreenState extends State<Lado2Screen> {
     final data = kImplementData[_selectedImplement]!;
 
     return _buildBox(
-      title: 'Resumo do tipo de implemento selecionado',
+      title: 'Resumo do tipo de implemento selecionado:',
       content: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -380,12 +393,9 @@ class _Lado2ScreenState extends State<Lado2Screen> {
     // configuração da escala superior: 10 a 350
     final List<double> labels = [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 250, 300, 350];
     final List<TickRange> ranges = [
-      TickRange(10, 20, 1),
-      TickRange(20, 30, 1),
-      TickRange(30, 60, 5),
-      TickRange(60, 100, 5),
-      TickRange(100, 200, 5),
-      TickRange(200, 350, 5),
+      TickRange(10, 30, 1),
+      TickRange(30, 100, 5),
+      TickRange(100, 350, 10),
     ];
 
     // calcula altura total para acomodar labels, barra e marcadores sem corte
@@ -466,10 +476,8 @@ class _Lado2ScreenState extends State<Lado2Screen> {
     // configuração da escala central: 10 a 150
     final List<double> labels = [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 150];
     final List<TickRange> ranges = [
-      TickRange(10, 20, 1),
-      TickRange(20, 30, 1),
-      TickRange(30, 60, 1),
-      TickRange(60, 100, 1),
+      TickRange(10, 30, 1),
+      TickRange(30, 100, 5),
       TickRange(100, 150, 5),
     ];
 
