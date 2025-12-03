@@ -70,58 +70,63 @@ class _Lado1ScreenState extends State<Lado1Screen> {
                     final double dynamicFactor = renderedWidth / _baseWidthRef;
 
                     return Center(
-                      child: SizedBox(
-                        width: renderedWidth,
-                        height: renderedHeight,
-                        child: Stack(
-                          clipBehavior: Clip.hardEdge,
-                          children: [
-                            Positioned.fill(
-                              child: GestureDetector(
-                                onPanUpdate: (details) {
-                                  setState(() {
-                                    _dragX += details.delta.dx / dynamicFactor;
-                                  });
-                                },
-                                child: Container(
-                                  color: Colors.transparent,
-                                  child: Stack(
-                                    children: [
-                                      Positioned(
-                                        top: 0,
-                                        left: 0,
-                                        child: Transform(
-                                          transform: Matrix4.identity()
-                                            ..translate(
-                                                (_calibPosX + _dragX) * dynamicFactor,
-                                                _calibPosY * dynamicFactor
-                                            )
-                                            ..scale(
-                                                _calibScaleX * dynamicFactor,
-                                                _calibScaleY * dynamicFactor
+                      child: InteractiveViewer(
+                        minScale: 0.5,
+                        maxScale: 4.0,
+                        boundaryMargin: const EdgeInsets.all(20.0),
+                        child: SizedBox(
+                          width: renderedWidth,
+                          height: renderedHeight,
+                          child: Stack(
+                            clipBehavior: Clip.hardEdge,
+                            children: [
+                              Positioned.fill(
+                                child: GestureDetector(
+                                  onPanUpdate: (details) {
+                                    setState(() {
+                                      _dragX += details.delta.dx / dynamicFactor;
+                                    });
+                                  },
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    child: Stack(
+                                      children: [
+                                        Positioned(
+                                          top: 0,
+                                          left: 0,
+                                          child: Transform(
+                                            transform: Matrix4.identity()
+                                              ..translate(
+                                                  (_calibPosX + _dragX) * dynamicFactor,
+                                                  _calibPosY * dynamicFactor
+                                              )
+                                              ..scale(
+                                                  _calibScaleX * dynamicFactor,
+                                                  _calibScaleY * dynamicFactor
+                                              ),
+                                            alignment: Alignment.topLeft,
+                                            child: Image.asset(
+                                              'assets/interno_002.jpg',
+                                              fit: BoxFit.none,
                                             ),
-                                          alignment: Alignment.topLeft,
-                                          child: Image.asset(
-                                            'assets/interno_002.jpg',
-                                            fit: BoxFit.none,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
 
-                            IgnorePointer(
-                              child: SizedBox.expand(
-                                child: Image.asset(
-                                  'assets/externo_001.png',
-                                  fit: BoxFit.fill,
+                              IgnorePointer(
+                                child: SizedBox.expand(
+                                  child: Image.asset(
+                                    'assets/externo_001.png',
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
