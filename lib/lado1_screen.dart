@@ -15,9 +15,9 @@ class _Lado1ScreenState extends State<Lado1Screen> {
 
   final double _calibRatio = 2.1497;
   final double _calibScaleX = 0.4145;
-  final double _calibScaleY = 0.3763;
+  final double _calibScaleY = 0.3663;
   final double _calibPosX = -1.3309;
-  final double _calibPosY = 29.7976;
+  final double _calibPosY = 33.7976;
 
   double _dragX = 0.0;
 
