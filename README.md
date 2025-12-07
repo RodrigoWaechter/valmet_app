@@ -58,3 +58,6 @@ Siga os passos abaixo para rodar o aplicativo em seu ambiente de desenvolvimento
         ```bash
         flutter run
         ```
+## Autores
+- Lucas Souza da Silva
+- Rodrigo Hammes Waechter
