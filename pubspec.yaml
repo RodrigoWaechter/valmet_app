@@ -1,5 +1,5 @@
 name: valmet_app
-description: "A new Flutter project."
+description: "O Trator da nossa Terra."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -38,7 +38,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  flutter_launcher_icons: ^0.13.1
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -91,3 +91,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_name:
+  name: "ReguaValmet"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/appIcon.png"
+  min_sdk_android: 21
